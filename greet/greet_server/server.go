@@ -51,25 +51,24 @@ func (*server)GreetManyTimes(req *greetpb.GreetManytimesRequest,stream greetpb.G
 func (*server)LongGreet(stream greetpb.GreetService_LongGreetServer) error{
 
 	fmt.Println("long greet function is invoked with  streaming request")
-	result:="Hello "
+	result:=""
 for {
 	req,err:=stream.Recv()
 	if err==io.EOF{
 		//we have finished the reading the client stream
-		stream.SendAndClose(&greetpb.LongGreetResponse{
+		return stream.SendAndClose(&greetpb.LongGreetResponse{
 			Result: result,
 		})
 	}
 
 	if err!=nil{
-		log.Fatalf("Error while reading client stream %v",err)
+		log.Fatalf("Error while reading client stream log greet function %v",err)
 	}
-	firstname:=req.GetGreeting().GetFirstName()
-	result+=firstname+"! "
-
-
-
+	firstName:=req.GetGreeting().GetFirstName()
+	result+="Hello "+ firstName+"! "
+	
 }
+ 
 }
 
 func main() {
@@ -77,7 +76,6 @@ func main() {
 	lis, err := net.Listen("tcp", "0.0.0.0:50051") 
 	if err != nil {
 		log.Fatalf("failed to listern %v", err)  
-
 	}
 	s := grpc.NewServer()
 	greetpb.RegisterGreetServiceServer(s, &server{})
